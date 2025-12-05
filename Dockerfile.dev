@@ -1,0 +1,17 @@
+FROM golang:1.25.4-alpine
+
+WORKDIR /app
+
+# Instalar Air dentro del contenedor (hot reload)
+RUN go install github.com/air-verse/air@latest
+
+# Cargar dependencias (cacheable)
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copiar el resto del código
+COPY . .
+
+# Comando para ejecutar con hot reload
+CMD ["air"]
+
