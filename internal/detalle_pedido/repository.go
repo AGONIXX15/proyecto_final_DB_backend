@@ -28,12 +28,12 @@ func (r *DetallePedidoRepository) GetAll() ([]DetallePedido, error) {
 	return detalles, nil
 }
 
-func (r *DetallePedidoRepository) GetByID(numPedido int, codProducto int) (*DetallePedido, error) {
+func (r *DetallePedidoRepository) GetByID(numPedido int,typePedido string, codProducto uint) (*DetallePedido, error) {
 	var detalle DetallePedido
 	err := r.db.First(
 		&detalle,
-		"num_pedido = ? AND cod_producto = ?",
-		numPedido, codProducto,
+		"num_pedido = ? AND type_item = ? AND cod_producto = ?",
+		numPedido,typePedido, codProducto,
 	).Error
 
 	if err != nil {
@@ -67,7 +67,7 @@ func (r *DetallePedidoRepository) Delete(numPedido int, codProducto int) error {
 	return nil
 }
 
-func (r *DetallePedidoRepository) UpdatePartial(numPedido int, typeItem string, codItem int, updates map[string]interface{}) error {
+func (r *DetallePedidoRepository) UpdatePartial(numPedido int, typeItem string, codItem uint, updates map[string]interface{}) error {
     result := r.db.
         Model(&DetallePedido{}).
         Where("num_pedido = ? AND type_item = ? AND cod_item = ?", numPedido, typeItem, codItem).
@@ -78,10 +78,9 @@ func (r *DetallePedidoRepository) UpdatePartial(numPedido int, typeItem string, 
     }
 
     if result.RowsAffected == 0 {
-        return fmt.Errorf("%w: detalle pedido (%d, %s, %d) no encontrado", ErrNotFound, numPedido, typeItem, codItem)
+        return fmt.Errorf("%w: detalle pedido no encontrado", ErrNotFound)
     }
 
     return nil
 }
-
 

@@ -68,8 +68,7 @@ func (h *UniformeHandler) CreateUniforme(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "datos de forma invalida"})
 		return
 	}
-	if err := h.Service.CreateUniforme(&uniforme); err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+	if err := h.Service.CreateUniforme(&uniforme); err != nil { c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusCreated, uniforme)

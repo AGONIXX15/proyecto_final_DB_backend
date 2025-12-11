@@ -1,6 +1,7 @@
 package producto_terminado
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/AGONIXX15/db_proyecto_final/internal/utils"
@@ -20,7 +21,6 @@ type ProductoTerminadoUpdateDTO struct {
 	Sexo               *string  `json:"sexo"`
 	Precio             *float64 `json:"precio"`
 	CantidadExistencia *int     `json:"cantidad_existencia"`
-	Estado             *string  `json:"estado"`
 }
 
 
@@ -32,9 +32,10 @@ func (h *ProductoTerminadoHandler) Create(c *gin.Context) {
     var producto ProductoTerminado
 
     if err := c.ShouldBindJSON(&producto); err != nil {
+			fmt.Println("fallo haciendo el binding")
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
-    }
+    }	
 
     if err := h.service.Create(&producto); err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -68,21 +69,18 @@ func (h *ProductoTerminadoHandler) GetByID(c *gin.Context) {
 func (h *ProductoTerminadoHandler) Update(c *gin.Context) {
     id := utils.MustParamUint(c, "id")
 
-    // 1. Verificar que el producto exista
     _, err := h.service.GetByID(id)
     if err != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "Producto no encontrado"})
         return
     }
 
-    // 2. Leer el DTO parcial
     var dto ProductoTerminadoUpdateDTO
     if err := c.ShouldBindJSON(&dto); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": "JSON inválido"})
         return
     }
 
-    // 3. Convertir el DTO en map para UpdatePartial
     updates := make(map[string]interface{})
 
     if dto.Nombre != nil {
@@ -106,17 +104,12 @@ func (h *ProductoTerminadoHandler) Update(c *gin.Context) {
     if dto.CantidadExistencia != nil {
         updates["cantidad_existencia"] = *dto.CantidadExistencia
     }
-    if dto.Estado != nil {
-        updates["estado"] = *dto.Estado
-    }
 
-    // 4. Ejecutar update parcial
     if err := h.service.UpdatePartial(id, updates); err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
     }
 
-    // 5. Devolver el objeto actualizado
     updated, _ := h.service.GetByID(id)
 
     c.JSON(http.StatusOK, updated)

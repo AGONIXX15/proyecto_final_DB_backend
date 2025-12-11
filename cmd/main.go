@@ -16,6 +16,7 @@ import (
 	"github.com/AGONIXX15/db_proyecto_final/internal/pedido"
 	"github.com/AGONIXX15/db_proyecto_final/internal/producto_terminado"
 	"github.com/AGONIXX15/db_proyecto_final/internal/proveedor"
+	"github.com/AGONIXX15/db_proyecto_final/internal/reportes"
 	"github.com/AGONIXX15/db_proyecto_final/internal/uniforme"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -39,7 +40,7 @@ func main() {
 	router := gin.Default()
 
 	 router.Use(cors.New(cors.Config{
-        AllowOrigins:     []string{"http://localhost:3000"}, // tu frontend
+        AllowOrigins:     []string{"http://localhost:3000"},
         AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
         AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
         ExposeHeaders:    []string{"Content-Length"},
@@ -95,6 +96,12 @@ func main() {
 	productoService := producto_terminado.NewProductoTerminadoService(productoRepo)
 	productoHandler := producto_terminado.NewProductoTerminadoHandler(productoService)
 	producto_terminado.RegisterProductoTerminadoRoutes(router,productoHandler)
+
+
+	reportesRepo := reportes.NewReporteRepo(database.DB)
+	reportesService := reportes.NewReporteService(reportesRepo)
+	reportesHandler := reportes.NewReporteHandler(reportesService)
+	reportes.RegisterRoutesReportes(router, reportesHandler)
 
 	router.Use(cors.Default())
 	router.Run(":8080")

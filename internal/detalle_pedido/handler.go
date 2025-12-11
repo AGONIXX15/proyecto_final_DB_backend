@@ -13,11 +13,14 @@ type DetallePedidoHandler struct {
 	Service *DetallePedidoService
 }
 
-type UpdateDetalleDTO struct {
-    Cantidad      *int    `json:"cantidad"`
-    Medidas       *string `json:"medidas"`
-    Observaciones *string `json:"observaciones"`
+type DetallePedidoUpdateDTO struct {
+	Cantidad       *int     `json:"cantidad"`
+	Medidas        *string  `json:"medidas"`
+	Observaciones  *string  `json:"observaciones"`
+	PrecioUnitario *float64 `json:"precio_unitario"`
+	SubTotal       *float64 `json:"subtotal"`
 }
+
 
 
 func NewDetallePedidoHandler(service *DetallePedidoService) *DetallePedidoHandler {
@@ -45,20 +48,13 @@ func (h *DetallePedidoHandler) GetAllDetalles(c *gin.Context) {
 	c.JSON(http.StatusOK, detalles)
 }
 
-// GET /detalle_pedidos/:numPedido/:codProducto
+// GET /detalle_pedidos/:numPedido/:typeItem/:codProducto
 func (h *DetallePedidoHandler) GetDetalle(c *gin.Context) {
-	numPedido, err := strconv.Atoi(c.Param("numPedido"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "numPedido inválido"})
-		return
-	}
-	codProducto, err := strconv.Atoi(c.Param("codProducto"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "codProducto inválido"})
-		return
-	}
+	numPedido := int(utils.MustParamUint(c, "numPedido"))
+	typeItem := c.Param("typeItem")
+	codProducto := utils.MustParamUint(c,"codProducto")
 
-	detalle, err := h.Service.GetDetalle(numPedido, codProducto)
+	detalle, err := h.Service.GetDetalle(numPedido, typeItem, codProducto)
 	if err != nil {
 		HandleServiceError(c, err)
 		return
@@ -82,11 +78,19 @@ func (h *DetallePedidoHandler) CreateDetalle(c *gin.Context) {
 
 // PUT /detalle_pedidos/:numPedido/:codProducto
 func (h *DetallePedidoHandler) UpdateDetalle(c *gin.Context) {
-    numPedido := utils.MustParamUint(c, "numPedido")
-    typeItem := c.Param("typeItem")
-    codItem := utils.MustParamUint(c, "codItem")
+    numPedido := int(utils.MustParamUint(c, "num_pedido"))
+    typeItem := c.Param("type_item")
+    codItem := utils.MustParamUint(c, "cod_item")
 
-    var dto UpdateDetalleDTO
+    // Verificar existencia
+    _, err := h.Service.GetDetalle(numPedido, typeItem, codItem)
+    if err != nil {
+        HandleServiceError(c, err)
+        return
+    }
+
+    // DTO parcial
+    var dto DetallePedidoUpdateDTO
     if err := c.ShouldBindJSON(&dto); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": "datos de forma inválida"})
         return
@@ -103,22 +107,29 @@ func (h *DetallePedidoHandler) UpdateDetalle(c *gin.Context) {
     if dto.Observaciones != nil {
         updates["observaciones"] = *dto.Observaciones
     }
-
-    if len(updates) == 0 {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "ningun campo para actualizar"})
-        return
+    if dto.PrecioUnitario != nil {
+        updates["precio_unitario"] = *dto.PrecioUnitario
+    }
+    if dto.SubTotal != nil {
+        updates["subtotal"] = *dto.SubTotal
     }
 
-    if err := h.Service.UpdateDetallePartial(int(numPedido), typeItem, int(codItem), updates); err != nil {
+    if err := h.Service.UpdateDetallePartial(numPedido, typeItem, codItem, updates); err != nil {
         HandleServiceError(c, err)
         return
     }
 
-    c.JSON(http.StatusOK, gin.H{"message": "detalle pedido actualizado exitosamente"})
+    actualizado, _ := h.Service.GetDetalle(numPedido, typeItem, codItem)
+
+    c.JSON(http.StatusOK, gin.H{
+        "message":  "detalle pedido actualizado exitosamente",
+        "detalle": actualizado,
+    })
 }
 
 
-// DELETE /detalle_pedidos/:numPedido/:codProducto
+
+// DELETE /detalle_pedidos/:numPedido/:typePedido/:codProducto
 func (h *DetallePedidoHandler) DeleteDetalle(c *gin.Context) {
 	numPedido, err := strconv.Atoi(c.Param("numPedido"))
 	if err != nil {

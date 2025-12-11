@@ -12,8 +12,8 @@ func (s *DetallePedidoService) GetAllDetalles() ([]DetallePedido, error) {
 	return s.repo.GetAll()
 }
 
-func (s *DetallePedidoService) GetDetalle(numPedido int, codProducto int) (*DetallePedido, error) {
-	return s.repo.GetByID(numPedido, codProducto)
+func (s *DetallePedidoService) GetDetalle(numPedido int,typePedido string, codProducto uint) (*DetallePedido, error) {
+	return s.repo.GetByID(numPedido,typePedido, codProducto)
 }
 
 func (s *DetallePedidoService) CreateDetalle(d *DetallePedido) error {
@@ -28,7 +28,7 @@ func (s *DetallePedidoService) DeleteDetalle(numPedido int, codProducto int) err
 	return s.repo.Delete(numPedido, codProducto)
 }
 
-func (s *DetallePedidoService) UpdateDetallePartial(numPedido int, typeItem string, codItem int, updates map[string]interface{}) error {
+func (s *DetallePedidoService) UpdateDetallePartial(numPedido int, typeItem string, codItem uint, updates map[string]interface{}) error {
     return s.repo.UpdatePartial(numPedido, typeItem, codItem, updates)
 }
 

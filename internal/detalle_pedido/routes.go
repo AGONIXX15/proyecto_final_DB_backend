@@ -6,10 +6,10 @@ func RegisterDetallePedidoRoutes(r *gin.Engine, h *DetallePedidoHandler) {
 	router := r.Group("/detalle_pedidos")
 	{
 		router.GET("", h.GetAllDetalles)
-		router.GET("/:numPedido/:codProducto", h.GetDetalle)
+		router.GET("/:numPedido/:typePedido/:codProducto", h.GetDetalle)
 
 		router.POST("", h.CreateDetalle)
-		router.PUT("/:numPedido/:codProducto", h.UpdateDetalle)
+		router.PUT("/:numPedido/:typePedido/:codProducto", h.UpdateDetalle)
 
 		router.DELETE("/:numPedido/:codProducto", h.DeleteDetalle)
 	}

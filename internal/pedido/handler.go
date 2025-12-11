@@ -2,6 +2,7 @@ package pedido
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -61,13 +62,17 @@ type PedidoRequest struct {
 func (h *PedidoHandler) CreatePedido(c *gin.Context) {
 	var req PedidoRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		fmt.Println("datos invalidos")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "datos de forma invalida"})
 		return
 	}
+
 	if err := h.Service.CreatePedido(&req.Pedido, req.Detalles); err != nil {
+		fmt.Println("no se pudo crear")
 		HandleServiceError(c, err)
 		return
 	}
+	fmt.Println("se pudo crear")
 	c.JSON(http.StatusCreated, req.Pedido)
 }
 
