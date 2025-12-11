@@ -81,10 +81,12 @@ func (h *PedidoHandler) UpdatePedido(c *gin.Context) {
 	id := utils.MustParamUint(c,"id")
 	var req PedidoRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		fmt.Println("datos actualizacion pedido invalidos")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "datos de forma invalida"})
 		return
 	}
 	if err := h.Service.UpdatePedido(int(id), &req.Pedido, req.Detalles); err != nil {
+		fmt.Println("error realizando la actualizacion")
 		HandleServiceError(c, err)
 		return
 	}
@@ -99,5 +101,19 @@ func (h *PedidoHandler) DeletePedido(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "pedido eliminado exitosamente"})
+}
+
+// /pedidos/:id/entregar
+func (h *PedidoHandler) DeliverPedido(c *gin.Context) {
+	id := utils.MustParamUint(c,"id")
+
+	err := h.Service.repo.deliverPedidoFunction(int(id))
+	if err != nil {
+		fmt.Println("error en deliver ",err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error":err.Error()})
+		return
+	}
+	
+	c.JSON(http.StatusOK, gin.H{"message":"se ha hecho entrega"})
 }
 

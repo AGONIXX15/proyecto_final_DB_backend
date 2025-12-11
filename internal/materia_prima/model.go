@@ -9,4 +9,3 @@ type MateriaPrima struct {
 	UnidadMedida  string `gorm:"size:30" json:"unidad_medida"`
 	NITProveedor  int    `json:"nit_proveedor"`
 }
-

@@ -9,7 +9,7 @@ type Pedido struct {
 	FechaEncargo time.Time `json:"fecha_encargo"`
 	FechaEntrega time.Time `json:"fecha_entrega"`
 	Abono        float64   `json:"abono"`
-	Estado       string    `gorm:"size:20" json:"estado"`
+	Estado       string    `gorm:"size:20;check: estado IN ('Pendiente','Cancelado','Entregado')" json:"estado"`
 	DocCliente   int       `json:"doc_cliente"`
 }
 

@@ -1,17 +1,18 @@
 package reportes
 
-import "github.com/gin-gonic/gin"
+import (
+    "github.com/gin-gonic/gin"
+)
 
+func RegisterRoutesReportes(router *gin.Engine, h *ReporteHandler) {
 
-func RegisterRoutesReportes(r *gin.Engine, h *ReporteHandler) {
-	v := r.Group("/reportes")
-{
-    v.GET("/productos-pendientes", h.ProductosPendientes)
-    v.GET("/productos-cliente/:documento", h.ProductosPorCliente)
-    v.GET("/productos-disponibles", h.ProductosDisponibles)
-    v.GET("/colegios-uniformes", h.ColegiosConUniformes)
-    v.GET("/uniformes-colegio", h.UniformesPorColegio)
-    v.GET("/ventas-colegio", h.VentasPorColegio)
-    v.GET("/total-ventas", h.TotalVentas)
+    r := router.Group("/reportes")
+    {
+        // r.GET("/productos-pendientes", h.PedidosPendientes)
+        r.GET("/productos-cliente/:documento", h.ProductosPorCliente)
+        r.GET("/colegios-uniformes", h.ColegiosUniformes)
+        r.GET("/ventas-colegio", h.VentasColegio)
+        r.GET("/total-ventas", h.TotalVentas)
+    }
 }
-}
+

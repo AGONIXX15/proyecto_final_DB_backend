@@ -66,17 +66,25 @@ func (r *PedidoRepository) Delete(id int) error {
 func (r *PedidoRepository) CreateWithFunction(pedido *Pedido, detalles []detalle_pedido.DetallePedido) error {
 	detallesJSON, err := json.Marshal(detalles)
 	if err != nil {
+		fmt.Println("error serializando datos")
 		return fmt.Errorf("error serializando detalles: %w", err)
 	}
 
-	return r.db.Exec(
-		"SELECT crear_pedido($1, $2, $3, $4, $5::json)",
+	fmt.Println("ejecutando la vuelta")
+	result := r.db.Exec(
+		"SELECT crear_pedido($1::bigint, $2::date, $3::date, $4::numeric, $5::json)",
 		pedido.DocCliente,
 		pedido.FechaEncargo,
 		pedido.FechaEntrega,
 		pedido.Abono,
 		string(detallesJSON),
-	).Error
+	)
+
+	if result.Error != nil {
+		fmt.Println(result.Error)
+	}
+
+	return result.Error
 }
 
 func (r *PedidoRepository) UpdateWithFunction(numPedido int, updatedPedido *Pedido, nuevosDetalles []detalle_pedido.DetallePedido) error {
@@ -87,19 +95,30 @@ func (r *PedidoRepository) UpdateWithFunction(numPedido int, updatedPedido *Pedi
 
 	query := `
         SELECT actualizar_pedido(
-            $1, $2, $3, $4
+	$1::int, $2::date, $3::numeric, $4::json
         )
     `
-	return r.db.Exec(
+	result := r.db.Exec(
 		query,
 		numPedido,
 		updatedPedido.FechaEntrega,
 		updatedPedido.Abono,
 		detallesJSON,
-	).Error
+	)
+
+	if result.Error != nil {
+		fmt.Println(result.Error)
+	}
+
+
+	return result.Error
 }
 
 func (r *PedidoRepository) CancelWithFunction(numPedido int) error {
-	return r.db.Exec("SELECT cancelar_pedido($1)", numPedido).Error
+	return r.db.Exec("SELECT cancelar_pedido($1::int)", numPedido).Error
+}
+func (r *PedidoRepository) deliverPedidoFunction(numPedido int) error {
+	return r.db.Exec("SELECT entregar_pedido($1::int)", numPedido).Error
+
 }
 

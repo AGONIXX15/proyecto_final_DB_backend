@@ -8,4 +8,3 @@ type Factura struct {
 	Total      float64 `json:"total"`
 	NumPedido  int     `json:"num_pedido"`
 }
- 

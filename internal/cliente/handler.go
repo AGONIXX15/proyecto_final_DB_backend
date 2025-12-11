@@ -2,6 +2,7 @@ package cliente
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/AGONIXX15/db_proyecto_final/internal/utils"
@@ -87,10 +88,11 @@ func (h *ClienteHandler) DeleteCliente(c *gin.Context) {
 }
 // UPDATE /clientes/:documento || PATCH /clientes/:documento
 func (h *ClienteHandler) UpdateCliente(c *gin.Context) {
-    documento := utils.MustParamUint(c, "documento")
+    documento := utils.MustParamUint(c, "id")
 
     var dto UpdateClienteDTO
     if err := c.ShouldBindJSON(&dto); err != nil {
+		fmt.Println("cliente invalidooo")
         c.JSON(http.StatusBadRequest, gin.H{"error": "datos de forma invalida"})
         return
     }

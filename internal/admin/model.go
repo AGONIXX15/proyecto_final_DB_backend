@@ -1,7 +1,10 @@
 package admin
 
-import ("gorm.io/gorm"
-	"time")
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Admin struct {
 	    ID        uint           `gorm:"primaryKey" json:"id"`

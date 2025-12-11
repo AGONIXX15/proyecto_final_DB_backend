@@ -12,6 +12,7 @@ func RegisterPedidoRoutes(r *gin.Engine, h *PedidoHandler) {
 	router.POST("", h.CreatePedido)
 
 	router.PUT("/:id", h.UpdatePedido)
+	router.PUT("/:id/entregar", h.DeliverPedido)
 
 	router.DELETE("/:id", h.DeletePedido)
 	}

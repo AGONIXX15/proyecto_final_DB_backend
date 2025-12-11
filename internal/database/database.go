@@ -1,6 +1,7 @@
 package database
 
 import (
+
 	"github.com/AGONIXX15/db_proyecto_final/internal/admin"
 	"github.com/AGONIXX15/db_proyecto_final/internal/cliente"
 	"github.com/AGONIXX15/db_proyecto_final/internal/colegio"
@@ -23,6 +24,7 @@ func InitDB(dsn string) {
 	if err != nil {
 		panic("failed to connect to database")
 	}
+
 
 	DB = db
 	db.AutoMigrate(&cliente.Cliente{})

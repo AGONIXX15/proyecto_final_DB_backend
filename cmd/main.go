@@ -98,7 +98,7 @@ func main() {
 	producto_terminado.RegisterProductoTerminadoRoutes(router,productoHandler)
 
 
-	reportesRepo := reportes.NewReporteRepo(database.DB)
+	reportesRepo := reportes.NewReporteRepository(database.DB)
 	reportesService := reportes.NewReporteService(reportesRepo)
 	reportesHandler := reportes.NewReporteHandler(reportesService)
 	reportes.RegisterRoutesReportes(router, reportesHandler)
