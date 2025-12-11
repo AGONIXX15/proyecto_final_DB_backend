@@ -155,3 +155,24 @@ JOIN uniformes u ON u.id = dp.cod_item
 JOIN producto_terminados pt ON pt.cod_producto = dp.cod_item
 JOIN colegios c ON c.id = u.id_colegio
 WHERE dp.type_item = 'uniforme';
+
+
+CREATE OR REPLACE VIEW colegios_con_uniformes_esenciales AS
+SELECT
+    col.id AS id_colegio,
+    col.nombre AS nombre_colegio,
+    json_agg(
+        json_build_object(
+            'id_uniforme', u.id,
+            'tipo_uniforme', u.tipo_uniforme,
+            'color', u.color,
+            'tipo_tela', u.tipo_tela,
+            'bordado', u.bordado,
+            'estampado', u.estampado,
+            'detalles', u.detalles
+        )
+    ) AS uniformes
+FROM colegios col
+JOIN uniformes u ON u.id_colegio = col.id
+GROUP BY col.id, col.nombre;
+

@@ -34,7 +34,7 @@ func (h *ReporteHandler) ProductosPorCliente(c *gin.Context) {
 }
 
 func (h *ReporteHandler) ColegiosUniformes(c *gin.Context) {
-    colegios, err := h.service.ColegiosUniformes()
+    colegios, err := h.service.repo.GetColegiosConUniformes()
     if err != nil {
         c.JSON(500, gin.H{"error": err.Error()})
         return
