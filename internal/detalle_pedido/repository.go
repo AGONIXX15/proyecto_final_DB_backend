@@ -2,11 +2,13 @@ package detalle_pedido
 
 import (
 	"errors"
+	"fmt"
+
 	"gorm.io/gorm"
 )
 
 var (
-	ErrNotFound   = errors.New("detalle pedido no encontrado")
+	ErrNotFound   = errors.New("detalle de pedido no encontrado")
 	ErrDBInternal = errors.New("error interno en la base de datos")
 )
 
@@ -28,12 +30,19 @@ func (r *DetallePedidoRepository) GetAll() ([]DetallePedido, error) {
 
 func (r *DetallePedidoRepository) GetByID(numPedido int, codProducto int) (*DetallePedido, error) {
 	var detalle DetallePedido
-	if err := r.db.First(&detalle, "num_pedido = ? AND cod_producto = ?", numPedido, codProducto).Error; err != nil {
+	err := r.db.First(
+		&detalle,
+		"num_pedido = ? AND cod_producto = ?",
+		numPedido, codProducto,
+	).Error
+
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrNotFound
 		}
 		return nil, ErrDBInternal
 	}
+
 	return &detalle, nil
 }
 
@@ -57,4 +66,22 @@ func (r *DetallePedidoRepository) Delete(numPedido int, codProducto int) error {
 	}
 	return nil
 }
+
+func (r *DetallePedidoRepository) UpdatePartial(numPedido int, typeItem string, codItem int, updates map[string]interface{}) error {
+    result := r.db.
+        Model(&DetallePedido{}).
+        Where("num_pedido = ? AND type_item = ? AND cod_item = ?", numPedido, typeItem, codItem).
+        Updates(updates)
+
+    if result.Error != nil {
+        return fmt.Errorf("%w: %s", ErrDBInternal, result.Error)
+    }
+
+    if result.RowsAffected == 0 {
+        return fmt.Errorf("%w: detalle pedido (%d, %s, %d) no encontrado", ErrNotFound, numPedido, typeItem, codItem)
+    }
+
+    return nil
+}
+
 

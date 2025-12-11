@@ -28,3 +28,7 @@ func (s *ProveedorService) DeleteProveedor(nit int) error {
 	return s.repo.Delete(nit)
 }
 
+func (s *ProveedorService) UpdateProveedorPartial(nit int, updates map[string]interface{}) error {
+	return s.repo.UpdateProveedorPartial(nit, updates)
+}
+

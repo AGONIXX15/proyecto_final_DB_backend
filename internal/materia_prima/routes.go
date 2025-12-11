@@ -11,6 +11,7 @@ func RegisterMateriaPrimaRoutes(r *gin.Engine, h *MateriaPrimaHandler) {
 		router.POST("", h.CreateMateria)
 
 		router.PUT("/:id", h.UpdateMateria)
+		router.PATCH("/:id", h.UpdateMateria)
 
 		router.DELETE("/:id", h.DeleteMateria)
 	}

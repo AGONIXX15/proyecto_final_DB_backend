@@ -14,6 +14,7 @@ type AdminRepository interface {
 	Create(admin *Admin) error
 	Update(admin *Admin) error
 	Delete(id uint) error
+	UpdatePartial(id uint, updates map[string]interface{}) error
 }
 type adminRepository struct {
 	db *gorm.DB
@@ -106,3 +107,24 @@ func (r *adminRepository) FindByID(id uint) (*Admin, error) {
 	}
 	return admin,nil
 }
+
+func (r *adminRepository) UpdatePartial(id uint, updates map[string]interface{}) error {
+	fmt.Println("llegas aqui??? %d")
+	fmt.Printf("Updates ENVIADOS: %#v\n", updates)
+    result := r.db.Model(&Admin{}).Where("id = ?", id).Updates(updates)
+
+	fmt.Println("SQL:", result.Statement.SQL.String())
+
+    if result.Error != nil {
+			fmt.Println("fallo actualizando")
+        return fmt.Errorf("%w: %s", ErrDBInternal, result.Error)
+    }
+
+    if result.RowsAffected == 0 {
+			fmt.Println("fallo actualizando")
+        return fmt.Errorf("%w: admin con id %d no encontrado", ErrNotFound, id)
+    }
+		fmt.Println("se supone que actualizamos")
+    return nil
+}
+

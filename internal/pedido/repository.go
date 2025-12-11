@@ -1,8 +1,11 @@
 package pedido
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
+	"github.com/AGONIXX15/db_proyecto_final/internal/detalle_pedido"
 )
 
 var (
@@ -18,6 +21,7 @@ func NewPedidoRepository(db *gorm.DB) *PedidoRepository {
 	return &PedidoRepository{db: db}
 }
 
+// CRUD estándar
 func (r *PedidoRepository) GetAll() ([]Pedido, error) {
 	var pedidos []Pedido
 	if err := r.db.Find(&pedidos).Error; err != nil {
@@ -56,5 +60,46 @@ func (r *PedidoRepository) Delete(id int) error {
 		return ErrDBInternal
 	}
 	return nil
+}
+
+// Métodos específicos que usan funciones SQL
+func (r *PedidoRepository) CreateWithFunction(pedido *Pedido, detalles []detalle_pedido.DetallePedido) error {
+	detallesJSON, err := json.Marshal(detalles)
+	if err != nil {
+		return fmt.Errorf("error serializando detalles: %w", err)
+	}
+
+	return r.db.Exec(
+		"SELECT crear_pedido($1, $2, $3, $4, $5::json)",
+		pedido.DocCliente,
+		pedido.FechaEncargo,
+		pedido.FechaEntrega,
+		pedido.Abono,
+		string(detallesJSON),
+	).Error
+}
+
+func (r *PedidoRepository) UpdateWithFunction(numPedido int, updatedPedido *Pedido, nuevosDetalles []detalle_pedido.DetallePedido) error {
+	detallesJSON, err := json.Marshal(nuevosDetalles)
+	if err != nil {
+		return fmt.Errorf("error serializando detalles: %w", err)
+	}
+
+	query := `
+        SELECT actualizar_pedido(
+            $1, $2, $3, $4
+        )
+    `
+	return r.db.Exec(
+		query,
+		numPedido,
+		updatedPedido.FechaEntrega,
+		updatedPedido.Abono,
+		detallesJSON,
+	).Error
+}
+
+func (r *PedidoRepository) CancelWithFunction(numPedido int) error {
+	return r.db.Exec("SELECT cancelar_pedido($1)", numPedido).Error
 }
 

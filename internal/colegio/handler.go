@@ -5,12 +5,20 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/AGONIXX15/db_proyecto_final/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
 type ColegioHandler struct {
 	Service *ColegioService
 }
+
+type UpdateColegioDTO struct {
+    Nombre    *string `json:"nombre"`
+    Direccion *string `json:"direccion"`
+    Telefono  *string `json:"telefono"`
+}
+
 
 func NewColegioHandler(service *ColegioService) *ColegioHandler {
 	return &ColegioHandler{Service: service}
@@ -65,17 +73,39 @@ func (h *ColegioHandler) CreateColegio(c *gin.Context) {
 
 // PUT /colegios/:id
 func (h *ColegioHandler) UpdateColegio(c *gin.Context) {
-	var colegio Colegio
-	if err := c.ShouldBindJSON(&colegio); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "datos de forma invalida"})
-		return
-	}
-	if err := h.Service.UpdateColegio(&colegio); err != nil {
-		HandleServiceError(c, err)
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "colegio actualizado exitosamente"})
+    id := utils.MustParamUint(c, "id")
+
+    var dto UpdateColegioDTO
+    if err := c.ShouldBindJSON(&dto); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "datos de forma invalida"})
+        return
+    }
+
+    updates := make(map[string]interface{})
+
+    if dto.Nombre != nil {
+        updates["nombre"] = *dto.Nombre
+    }
+    if dto.Direccion != nil {
+        updates["direccion"] = *dto.Direccion
+    }
+    if dto.Telefono != nil {
+        updates["telefono"] = *dto.Telefono
+    }
+
+    if len(updates) == 0 {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "ningun campo para actualizar"})
+        return
+    }
+
+    if err := h.Service.UpdateColegioPartial(uint(id), updates); err != nil {
+        HandleServiceError(c, err)
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "colegio actualizado exitosamente"})
 }
+
 
 // DELETE /colegios/:id
 func (h *ColegioHandler) DeleteColegio(c *gin.Context) {

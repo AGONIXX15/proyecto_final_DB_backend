@@ -14,6 +14,7 @@ func RegisterAdminRoutes(r *gin.Engine, h *AdminHandler) {
 		router.POST("",h.CreateAdmin)
 
 		router.PATCH("/:id",h.UpdateAdmin)
+		router.PUT("/:id", h.UpdateAdmin)
 		router.DELETE("/:id", h.DeleteAdmin)
 	}
 }

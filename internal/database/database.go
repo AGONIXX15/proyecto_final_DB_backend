@@ -8,6 +8,7 @@ import (
 	"github.com/AGONIXX15/db_proyecto_final/internal/factura"
 	"github.com/AGONIXX15/db_proyecto_final/internal/materia_prima"
 	"github.com/AGONIXX15/db_proyecto_final/internal/pedido"
+	"github.com/AGONIXX15/db_proyecto_final/internal/producto_terminado"
 	"github.com/AGONIXX15/db_proyecto_final/internal/proveedor"
 	"github.com/AGONIXX15/db_proyecto_final/internal/uniforme"
 	"gorm.io/driver/postgres"
@@ -33,4 +34,5 @@ func InitDB(dsn string) {
 	db.AutoMigrate(&pedido.Pedido{})
 	db.AutoMigrate(&proveedor.Proveedor{})
 	db.AutoMigrate(&uniforme.Uniforme{})
+	db.AutoMigrate(&producto_terminado.ProductoTerminado{})
 }

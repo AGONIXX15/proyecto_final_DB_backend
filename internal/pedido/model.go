@@ -10,7 +10,6 @@ type Pedido struct {
 	FechaEntrega time.Time `json:"fecha_entrega"`
 	Abono        float64   `json:"abono"`
 	Estado       string    `gorm:"size:20" json:"estado"`
-	Medidas      string    `gorm:"size:200" json:"medidas"`
 	DocCliente   int       `json:"doc_cliente"`
 }
 

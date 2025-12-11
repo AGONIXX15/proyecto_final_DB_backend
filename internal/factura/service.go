@@ -28,3 +28,7 @@ func (s *FacturaService) DeleteFactura(id int) error {
 	return s.repo.Delete(id)
 }
 
+func (s *FacturaService) UpdateFacturaPartial(numFactura int, updates map[string]interface{}) error {
+    return s.repo.UpdatePartial(numFactura, updates)
+}
+

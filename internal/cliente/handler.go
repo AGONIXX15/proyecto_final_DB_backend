@@ -12,6 +12,12 @@ type ClienteHandler struct {
 	Service *ClienteService
 }
 
+type UpdateClienteDTO struct {
+    NombreCompleto *string `json:"nombre"`
+    Telefono       *string `json:"telefono"`
+}
+
+
 func NewClienteHandler(service *ClienteService) *ClienteHandler {
 	return &ClienteHandler{Service: service}
 }
@@ -81,17 +87,35 @@ func (h *ClienteHandler) DeleteCliente(c *gin.Context) {
 }
 // UPDATE /clientes/:documento || PATCH /clientes/:documento
 func (h *ClienteHandler) UpdateCliente(c *gin.Context) {
-	var cliente Cliente
-	if err := c.ShouldBindJSON(&cliente); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error":"datos de forma invalida"})
-		return 
-	}
+    documento := utils.MustParamUint(c, "documento")
 
-	err := h.Service.UpdateCliente(&cliente)
-	if err != nil {
-		HandleServiceError(c,err)
-		return
-	}
+    var dto UpdateClienteDTO
+    if err := c.ShouldBindJSON(&dto); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "datos de forma invalida"})
+        return
+    }
 
-	c.JSON(http.StatusOK, gin.H{"message":"cliente actualizado exitosamente"})
+    // Mapa dinámico solo con los campos enviados
+    updates := make(map[string]interface{})
+
+    if dto.NombreCompleto != nil {
+        updates["nombre_completo"] = *dto.NombreCompleto
+    }
+
+    if dto.Telefono != nil {
+        updates["telefono"] = *dto.Telefono
+    }
+
+    if len(updates) == 0 {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "ningun campo para actualizar"})
+        return
+    }
+
+    if err := h.Service.UpdateClientePartial(documento, updates); err != nil {
+        HandleServiceError(c, err)
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "cliente actualizado exitosamente"})
 }
+

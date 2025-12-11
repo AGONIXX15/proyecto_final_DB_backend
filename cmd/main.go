@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
 
+	"github.com/AGONIXX15/db_proyecto_final/internal/admin"
 	"github.com/AGONIXX15/db_proyecto_final/internal/cliente"
 	"github.com/AGONIXX15/db_proyecto_final/internal/colegio"
 	"github.com/AGONIXX15/db_proyecto_final/internal/database"
@@ -12,6 +14,7 @@ import (
 	"github.com/AGONIXX15/db_proyecto_final/internal/factura"
 	"github.com/AGONIXX15/db_proyecto_final/internal/materia_prima"
 	"github.com/AGONIXX15/db_proyecto_final/internal/pedido"
+	"github.com/AGONIXX15/db_proyecto_final/internal/producto_terminado"
 	"github.com/AGONIXX15/db_proyecto_final/internal/proveedor"
 	"github.com/AGONIXX15/db_proyecto_final/internal/uniforme"
 	"github.com/gin-contrib/cors"
@@ -29,6 +32,7 @@ func main() {
 	if dsn == "" {
 		log.Fatalln("error no DATABASE_URL in .env")
 	}
+	fmt.Println(dsn)
 
 	database.InitDB(dsn)
 
@@ -43,6 +47,10 @@ func main() {
         MaxAge: 12 * time.Hour,
     }))
 
+	adminRepo := admin.NewAdminRepository(database.DB)
+	adminService := admin.NewAdminService(adminRepo)
+	adminHandler := admin.NewAdminHandler(adminService)
+	admin.RegisterAdminRoutes(router, adminHandler)
 	clienteRepo := cliente.NewClienteRepository(database.DB)
 	clienteService := cliente.NewClienteService(clienteRepo)
 	clienteHandler := cliente.NewClienteHandler(clienteService)
@@ -82,6 +90,11 @@ func main() {
 	facturaService := factura.NewFacturaService(facturaRepo)
 	facturaHandler := factura.NewFacturaHandler(facturaService)
 	factura.RegisterFacturaRoutes(router, facturaHandler)
+
+	productoRepo := producto_terminado.NewProductoTerminadoRepository(database.DB)
+	productoService := producto_terminado.NewProductoTerminadoService(productoRepo)
+	productoHandler := producto_terminado.NewProductoTerminadoHandler(productoService)
+	producto_terminado.RegisterProductoTerminadoRoutes(router,productoHandler)
 
 	router.Use(cors.Default())
 	router.Run(":8080")

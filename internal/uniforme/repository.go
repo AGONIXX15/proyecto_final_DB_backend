@@ -2,6 +2,8 @@ package uniforme
 
 import (
 	"errors"
+	"fmt"
+
 	"gorm.io/gorm"
 )
 
@@ -56,5 +58,19 @@ func (r *UniformeRepository) Delete(id int) error {
 		return ErrDBInternal
 	}
 	return nil
+}
+
+func (r *UniformeRepository) UpdateUniformePartial(id int, updates map[string]interface{}) error {
+    result := r.db.Model(&Uniforme{}).Where("id = ?", id).Updates(updates)
+
+    if result.Error != nil {
+        return fmt.Errorf("%w: %s", ErrDBInternal, result.Error)
+    }
+
+    if result.RowsAffected == 0 {
+        return fmt.Errorf("%w: uniforme con id %d no encontrado", ErrNotFound, id)
+    }
+
+    return nil
 }
 

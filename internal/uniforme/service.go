@@ -28,3 +28,7 @@ func (s *UniformeService) DeleteUniforme(id int) error {
 	return s.repo.Delete(id)
 }
 
+func (s* UniformeService) UpdateUniformePartial(id int, updates map[string]interface{}) error {
+	return s.repo.UpdateUniformePartial(id, updates)
+}
+

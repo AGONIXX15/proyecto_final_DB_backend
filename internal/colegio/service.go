@@ -28,3 +28,7 @@ func (s *ColegioService) DeleteColegio(id int) error {
 	return s.repo.Delete(id)
 }
 
+func (s *ColegioService) UpdateColegioPartial(id uint, updates map[string]interface{}) error {
+    return s.repo.UpdatePartial(id, updates)
+}
+

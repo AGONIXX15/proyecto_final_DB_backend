@@ -2,6 +2,8 @@ package colegio
 
 import (
 	"errors"
+	"fmt"
+
 	"gorm.io/gorm"
 )
 
@@ -57,4 +59,21 @@ func (r *ColegioRepository) Delete(id int) error {
 	}
 	return nil
 }
+
+func (r *ColegioRepository) UpdatePartial(id uint, updates map[string]interface{}) error {
+    result := r.db.Model(&Colegio{}).
+        Where("id = ?", id).
+        Updates(updates)
+
+    if result.Error != nil {
+        return fmt.Errorf("%w: %s", ErrDBInternal, result.Error)
+    }
+
+    if result.RowsAffected == 0 {
+        return fmt.Errorf("%w: colegio con id %d no encontrado", ErrNotFound, id)
+    }
+
+    return nil
+}
+
 

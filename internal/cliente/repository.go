@@ -17,6 +17,7 @@ type ClienteRepository interface {
 	Create(cliente *Cliente) error
 	Update(cliente *Cliente) error
 	Delete(id uint) error
+	UpdatePartial(id uint, updates map[string]interface{}) error
 }
 
 type clienteRepository struct {
@@ -89,4 +90,21 @@ func (c *clienteRepository) Update(cliente *Cliente) error {
 
 	return nil
 }
+
+func (r *clienteRepository) UpdatePartial(id uint, updates map[string]interface{}) error {
+    result := r.db.Model(&Cliente{}).
+        Where("documento = ?", id).
+        Updates(updates)
+
+    if result.Error != nil {
+        return fmt.Errorf("%w: %s", ErrDBInternal, result.Error)
+    }
+
+    if result.RowsAffected == 0 {
+        return fmt.Errorf("%w: cliente con documento %d no encontrado", ErrNotFound, id)
+    }
+
+    return nil
+}
+
 

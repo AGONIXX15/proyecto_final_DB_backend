@@ -2,6 +2,8 @@ package proveedor
 
 import (
 	"errors"
+	"fmt"
+
 	"gorm.io/gorm"
 )
 
@@ -57,4 +59,17 @@ func (r *ProveedorRepository) Delete(nit int) error {
 	}
 	return nil
 }
+
+func (r *ProveedorRepository) UpdateProveedorPartial(nit int, updates map[string]interface{}) error {
+    result := r.db.Model(&Proveedor{}).Where("nit = ?", nit).Updates(updates)
+
+    if result.Error != nil {
+        return fmt.Errorf("%w: %s", ErrDBInternal, result.Error)
+    }
+    if result.RowsAffected == 0 {
+        return fmt.Errorf("%w: proveedor con NIT %d no encontrado", ErrNotFound, nit)
+    }
+    return nil
+}
+
 

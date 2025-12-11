@@ -28,3 +28,7 @@ func (s *DetallePedidoService) DeleteDetalle(numPedido int, codProducto int) err
 	return s.repo.Delete(numPedido, codProducto)
 }
 
+func (s *DetallePedidoService) UpdateDetallePartial(numPedido int, typeItem string, codItem int, updates map[string]interface{}) error {
+    return s.repo.UpdatePartial(numPedido, typeItem, codItem, updates)
+}
+

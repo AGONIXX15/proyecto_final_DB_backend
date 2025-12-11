@@ -5,12 +5,24 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/AGONIXX15/db_proyecto_final/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
 type UniformeHandler struct {
 	Service *UniformeService
 }
+
+type UniformeUpdateDTO struct {
+	TipoUniforme *string `json:"tipo_uniforme"`
+	Color        *string `json:"color"`
+	TipoTela     *string `json:"tipo_tela"`
+	Bordado      *string `json:"bordado"`
+	Estampado    *string `json:"estampado"`
+	Detalles     *string `json:"detalles"`
+	IDColegio    *int    `json:"id_colegio"`
+}
+
 
 func NewUniformeHandler(service *UniformeService) *UniformeHandler {
 	return &UniformeHandler{Service: service}
@@ -65,17 +77,57 @@ func (h *UniformeHandler) CreateUniforme(c *gin.Context) {
 
 // PUT /uniformes/:id
 func (h *UniformeHandler) UpdateUniforme(c *gin.Context) {
-	var uniforme Uniforme
-	if err := c.ShouldBindJSON(&uniforme); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "datos de forma invalida"})
-		return
-	}
-	if err := h.Service.UpdateUniforme(&uniforme); err != nil {
-		HandleServiceError(c, err)
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "uniforme actualizado exitosamente"})
+    id := int(utils.MustParamUint(c, "id"))
+
+    _, err := h.Service.repo.GetByID(id)
+    if err != nil {
+        HandleServiceError(c, err)
+        return
+    }
+
+    var dto UniformeUpdateDTO
+    if err := c.ShouldBindJSON(&dto); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "datos de forma invalida"})
+        return
+    }
+
+    updates := make(map[string]interface{})
+
+    if dto.TipoUniforme != nil {
+        updates["tipo_uniforme"] = *dto.TipoUniforme
+    }
+    if dto.Color != nil {
+        updates["color"] = *dto.Color
+    }
+    if dto.TipoTela != nil {
+        updates["tipo_tela"] = *dto.TipoTela
+    }
+    if dto.Bordado != nil {
+        updates["bordado"] = *dto.Bordado
+    }
+    if dto.Estampado != nil {
+        updates["estampado"] = *dto.Estampado
+    }
+    if dto.Detalles != nil {
+        updates["detalles"] = *dto.Detalles
+    }
+    if dto.IDColegio != nil {
+        updates["id_colegio"] = *dto.IDColegio
+    }
+
+    if err := h.Service.UpdateUniformePartial(id, updates); err != nil {
+        HandleServiceError(c, err)
+        return
+    }
+
+    actualizado, _ := h.Service.repo.GetByID(id)
+
+    c.JSON(http.StatusOK, gin.H{
+        "message":   "uniforme actualizado exitosamente",
+        "uniforme": actualizado,
+    })
 }
+
 
 // DELETE /uniformes/:id
 func (h *UniformeHandler) DeleteUniforme(c *gin.Context) {

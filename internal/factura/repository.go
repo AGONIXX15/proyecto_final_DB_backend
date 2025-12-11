@@ -60,4 +60,20 @@ func (r *FacturaRepository) Delete(id int) error {
 	}
 	return nil
 }
+func (r *FacturaRepository) UpdatePartial(numFactura int, updates map[string]interface{}) error {
+    result := r.db.
+        Model(&Factura{}).
+        Where("num_factura = ?", numFactura).
+        Updates(updates)
+
+    if result.Error != nil {
+        return fmt.Errorf("%w: %s", ErrDBInternal, result.Error)
+    }
+
+    if result.RowsAffected == 0 {
+        return fmt.Errorf("%w: factura con num_factura %d no encontrada", ErrNotFound, numFactura)
+    }
+
+    return nil
+}
 

@@ -38,3 +38,8 @@ func (s *ClienteService) GetAllClientes()  ([]Cliente, error) {
 func (s *ClienteService) GetCliente(documento uint) (*Cliente,error) {
 	return s.Repo.FindByID(documento)
 }
+
+func (s *ClienteService) UpdateClientePartial(documento uint, updates map[string]interface{}) error {
+    return s.Repo.UpdatePartial(documento, updates)
+}
+

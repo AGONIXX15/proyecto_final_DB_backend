@@ -1,7 +1,9 @@
 package admin
 
 import (
-	"github.com/AGONIXX15/db_proyecto_final/internal/utils"
+	"fmt"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AdminService struct {
@@ -14,11 +16,14 @@ func NewAdminService(repo AdminRepository) *AdminService {
 
 func (s *AdminService) CreateAdmin(admin *Admin) error {
 	_, err := s.Repo.FindByUsername(admin.Username)
+	if err == nil {
+		return fmt.Errorf("usuario ya existia")
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(admin.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-
-	hashedPassword := utils.HashPassword(admin.Password)
 	admin.Password = string(hashedPassword)
 	return s.Repo.Create(admin)
 }
@@ -39,22 +44,43 @@ func (s *AdminService) DeleteAdmin(id uint) error {
 }
 
 func (s *AdminService) UpdateAdmin(admin *Admin) error {
+    existingAdmin, err := s.GetByUsernameAdmin(admin.Username) // Devuelve todo el admin
+    if err != nil {
+        return fmt.Errorf("no se encontro el usuario a actualizar")
+    }
 
-	hashedPassword := utils.HashPassword(admin.Password)
-	admin.Password = string(hashedPassword)
-	return s.Repo.Update(admin)
+    if admin.Password != "" && admin.Password != existingAdmin.Password {
+        hashed, err := bcrypt.GenerateFromPassword([]byte(admin.Password), bcrypt.DefaultCost)
+        if err != nil {
+            return fmt.Errorf("error al hashear la contraseña")
+        }
+        admin.Password = string(hashed)
+    } else {
+        admin.Password = existingAdmin.Password
+    }
+
+    return s.Repo.Update(admin)
 }
 
-func (s *AdminService) LoginAdmin(username string, password string) error {
-	admin, err := s.Repo.FindByUsername(username)
-	if err != nil {
-		return err
-	}
 
-	if admin.Password == utils.HashPassword(password) {
-		return nil
-	}
+func (s *AdminService) LoginAdmin(username, password string) (*Admin, error) {
+    admin, err := s.Repo.FindByUsername(username)
+    if err != nil {
+			fmt.Println("usuario con ese nombre no encontrao")
+        return nil, err
+    }
 
-	return ErrPasswordWrong
+    // Verificar contraseña usando bcrypt
+    if err := bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(password)); err != nil {
+			fmt.Println("contraseñas diferentes")
+        return nil, ErrPasswordWrong
+    }
+
+    return admin, nil
 }
+
+func (s *AdminService) UpdateAdminPartial(id uint, updates map[string]interface{}) error {
+    return s.Repo.UpdatePartial(id, updates)
+}
+
 

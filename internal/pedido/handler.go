@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/AGONIXX15/db_proyecto_final/internal/detalle_pedido"
+	"github.com/AGONIXX15/db_proyecto_final/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,7 +43,7 @@ func (h *PedidoHandler) GetAllPedidos(c *gin.Context) {
 func (h *PedidoHandler) GetPedido(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
-	pedido, err := h.Service.GetPedido(id)
+	pedido, err := h.Service.GetPedidoByID(id)
 	if err != nil {
 		HandleServiceError(c, err)
 		return
@@ -49,28 +51,35 @@ func (h *PedidoHandler) GetPedido(c *gin.Context) {
 	c.JSON(http.StatusOK, pedido)
 }
 
+// DTO para recibir JSON de creación/actualización
+type PedidoRequest struct {
+	Pedido  Pedido                     `json:"pedido"`
+	Detalles []detalle_pedido.DetallePedido `json:"detalles"`
+}
+
 // POST /pedidos
 func (h *PedidoHandler) CreatePedido(c *gin.Context) {
-	var pedido Pedido
-	if err := c.ShouldBindJSON(&pedido); err != nil {
+	var req PedidoRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "datos de forma invalida"})
 		return
 	}
-	if err := h.Service.CreatePedido(&pedido); err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+	if err := h.Service.CreatePedido(&req.Pedido, req.Detalles); err != nil {
+		HandleServiceError(c, err)
 		return
 	}
-	c.JSON(http.StatusCreated, pedido)
+	c.JSON(http.StatusCreated, req.Pedido)
 }
 
 // PUT /pedidos/:id
 func (h *PedidoHandler) UpdatePedido(c *gin.Context) {
-	var pedido Pedido
-	if err := c.ShouldBindJSON(&pedido); err != nil {
+	id := utils.MustParamUint(c,"id")
+	var req PedidoRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "datos de forma invalida"})
 		return
 	}
-	if err := h.Service.UpdatePedido(&pedido); err != nil {
+	if err := h.Service.UpdatePedido(int(id), &req.Pedido, req.Detalles); err != nil {
 		HandleServiceError(c, err)
 		return
 	}

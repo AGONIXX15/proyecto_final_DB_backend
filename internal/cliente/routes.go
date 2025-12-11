@@ -12,5 +12,6 @@ func RegisterClienteRoutes(r *gin.Engine, h *ClienteHandler) {
 		router.GET("/:id",h.GetCliente)
 		router.DELETE("/:id",h.DeleteCliente)
 		router.PATCH("/:id", h.UpdateCliente)
+		router.PUT("/:id", h.UpdateCliente)
 	}
 }
